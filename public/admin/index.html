@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin — Pensentir</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <!-- LOGIN -->
+  <main class="login" id="login" hidden>
+    <form class="login-card" id="loginForm">
+      <img src="/img/logo.png" alt="Pensentir" width="84" height="84" />
+      <h1>Painel Pensentir</h1>
+      <input type="password" name="password" placeholder="Senha" autocomplete="current-password" required autofocus />
+      <button class="btn btn-gold" type="submit">Entrar</button>
+      <p class="msg err" id="loginMsg"></p>
+    </form>
+  </main>
+
+  <!-- APP -->
+  <div class="app" id="app" hidden>
+    <aside class="side">
+      <div class="side-brand"><img src="/img/logo.png" alt="" width="36" height="36" /><span>PENSENTIR</span></div>
+      <nav class="tabs" id="tabs">
+        <button data-tab="dash" class="active">Acessos</button>
+        <button data-tab="products">Produtos</button>
+        <button data-tab="phrases">Frases da roleta</button>
+        <button data-tab="leads">Lista VIP</button>
+        <button data-tab="settings">Configurações</button>
+      </nav>
+      <div class="side-foot">
+        <a href="/" target="_blank" rel="noopener">Ver site ↗</a>
+        <button id="logoutBtn">Sair</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- DASHBOARD -->
+      <section class="tab" id="tab-dash">
+        <header class="tab-head">
+          <h2>Acessos</h2>
+          <select id="daysSel">
+            <option value="7">Últimos 7 dias</option>
+            <option value="30" selected>Últimos 30 dias</option>
+            <option value="90">Últimos 90 dias</option>
+            <option value="365">Último ano</option>
+          </select>
+        </header>
+        <div class="kpis" id="kpis"></div>
+        <div class="card">
+          <h3>Visitas por dia</h3>
+          <div class="chart-box"><canvas id="chart"></canvas></div>
+        </div>
+        <div class="grid-3">
+          <div class="card"><h3>De onde vêm</h3><ul class="rank" id="refList"></ul></div>
+          <div class="card"><h3>Dispositivos</h3><ul class="rank" id="devList"></ul></div>
+          <div class="card"><h3>Produtos mais clicados</h3><ul class="rank" id="prodList"></ul></div>
+        </div>
+        <div class="card">
+          <h3>Últimos eventos</h3>
+          <div class="table-wrap"><table class="table" id="eventsTable"></table></div>
+        </div>
+      </section>
+
+      <!-- PRODUTOS -->
+      <section class="tab" id="tab-products" hidden>
+        <header class="tab-head">
+          <h2>Produtos</h2>
+          <button class="btn btn-gold" id="newProductBtn">+ Novo produto</button>
+        </header>
+        <p class="hint">O botão "Quero o meu" no site leva para o <b>link de pagamento do Mercado Pago</b> que você cadastrar aqui. Cada clique é contado em Acessos.</p>
+        <div class="plist" id="plist"></div>
+      </section>
+
+      <!-- FRASES -->
+      <section class="tab" id="tab-phrases" hidden>
+        <header class="tab-head"><h2>Frases da roleta</h2></header>
+        <form class="card phrase-form" id="phraseForm">
+          <select name="pillar" required></select>
+          <input name="text" placeholder="Nova frase" maxlength="300" required />
+          <input name="author" placeholder="Autor (opcional)" maxlength="80" />
+          <button class="btn btn-gold" type="submit">Adicionar</button>
+        </form>
+        <div class="card"><div class="table-wrap"><table class="table" id="phrasesTable"></table></div></div>
+      </section>
+
+      <!-- LEADS -->
+      <section class="tab" id="tab-leads" hidden>
+        <header class="tab-head">
+          <h2>Lista VIP <small id="leadCount"></small></h2>
+          <a class="btn btn-ghost" href="/api/admin/leads.csv">Baixar CSV</a>
+        </header>
+        <div class="card"><div class="table-wrap"><table class="table" id="leadsTable"></table></div></div>
+      </section>
+
+      <!-- CONFIG -->
+      <section class="tab" id="tab-settings" hidden>
+        <header class="tab-head"><h2>Configurações</h2></header>
+        <form class="card form" id="settingsForm">
+          <h3>Links do site</h3>
+          <label>Instagram<input name="instagram_url" type="url" placeholder="https://www.instagram.com/pensentir/" /></label>
+          <label>Facebook<input name="facebook_url" type="url" placeholder="https://www.facebook.com/..." /></label>
+          <label>E-mail de contato<input name="contact_email" type="email" placeholder="contato@..." /></label>
+          <button class="btn btn-gold" type="submit">Salvar links</button>
+        </form>
+
+        <form class="card form" id="igForm">
+          <h3>Instagram (API oficial)</h3>
+          <div class="ig-status" id="igStatus"></div>
+          <label>Novo token de acesso<input name="instagram_token" type="password" placeholder="Cole aqui o token gerado no painel da Meta" autocomplete="off" /></label>
+          <div class="row">
+            <button class="btn btn-gold" type="submit">Salvar token</button>
+            <button class="btn btn-ghost" type="button" id="igTestBtn">Testar conexão</button>
+            <button class="btn btn-ghost" type="button" id="igRefreshBtn">Renovar token agora</button>
+          </div>
+          <p class="hint">O token dura 60 dias. O site renova sozinho a cada ~20 dias enquanto tiver visitas. Se ficar mais de 60 dias sem renovar, gere outro na Meta e cole aqui.</p>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL PRODUTO -->
+  <div class="modal" id="productModal" hidden>
+    <form class="modal-card form" id="productForm">
+      <header class="tab-head"><h2 id="productModalTitle">Produto</h2><button type="button" class="x" data-close>×</button></header>
+      <input type="hidden" name="id" />
+      <label>Título *<input name="title" maxlength="140" required /></label>
+      <label>Subtítulo<input name="subtitle" maxlength="200" /></label>
+      <label>Descrição<textarea name="description" rows="4" maxlength="3000"></textarea></label>
+      <div class="row">
+        <label>Preço (R$) *<input name="price" type="number" min="0" step="0.01" required /></label>
+        <label>Preço antigo (R$)<input name="old_price" type="number" min="0" step="0.01" /></label>
+      </div>
+      <label>Link de pagamento Mercado Pago *<input name="checkout_url" type="url" placeholder="https://mpago.la/..." required /></label>
+      <label>Imagem
+        <div class="img-pick">
+          <img id="imgPreview" alt="" hidden />
+          <input name="image_url" type="url" placeholder="https://... ou envie um arquivo" />
+          <input type="file" id="imgFile" accept="image/png,image/jpeg,image/webp,image/gif" />
+        </div>
+      </label>
+      <div class="row">
+        <label>Selo<input name="badge" maxlength="40" placeholder="Lançamento" /></label>
+        <label>Ordem<input name="sort_order" type="number" step="1" value="0" /></label>
+      </div>
+      <label class="check"><input type="checkbox" name="active" checked /> Ativo no site</label>
+      <p class="msg err" id="productMsg"></p>
+      <div class="row end">
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="submit" class="btn btn-gold">Salvar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/admin/vendor/chart.umd.min.js"></script>
+  <script src="/admin/admin.js" type="module"></script>
+</body>
+</html>

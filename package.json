@@ -1,0 +1,19 @@
+{
+  "name": "pensentir",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Site Pensentir — Pensar • Sentir • Evoluir",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch --env-file=.env server.js"
+  },
+  "engines": {
+    "node": ">=20.6"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "express": "^4.22.3",
+    "multer": "^2.5.0"
+  }
+}
