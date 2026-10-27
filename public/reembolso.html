@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trocas e reembolso — Pensentir</title>
+  <meta name="description" content="Como pedir reembolso de compras na Pensentir." />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" type="image/png" href="/img/favicon.png" />
+  <link rel="preload" href="/fonts/jakarta.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="nav">
+    <a href="/" class="brand" aria-label="Pensentir — início">
+      <img src="/img/logo.png" alt="" width="36" height="36" />
+      <span>Pensentir</span>
+    </a>
+    <div class="nav-social">
+      <a class="btn btn-line" href="/" style="min-height:40px">Voltar ao site</a>
+    </div>
+  </header>
+
+  <main class="legal">
+
+    <h1>Trocas e reembolso</h1>
+    <p class="updated">Atualizado em 27 de outubro de 2026</p>
+
+    <h2>Direito de arrependimento: 7 dias</h2>
+    <p>Pelo art. 49 do Código de Defesa do Consumidor, você pode desistir de uma compra feita pela internet em até 7 dias corridos, contados da data da compra ou do recebimento do produto. O valor pago é devolvido integralmente, sem precisar explicar o motivo.</p>
+
+    <h2>Como pedir</h2>
+    <p>Envie um e-mail para <span class="fill" data-fill="contact_email"></span> dentro do prazo, com:</p>
+    <ul>
+      <li>seu nome completo;</li>
+      <li>o e-mail usado na compra;</li>
+      <li>o número da operação ou o comprovante do Mercado Pago.</li>
+    </ul>
+    <p>Confirmamos o recebimento do pedido e solicitamos o estorno ao Mercado Pago em até 5 dias úteis.</p>
+
+    <h2>Quando o dinheiro volta</h2>
+    <p>O estorno é feito pelo Mercado Pago, no mesmo meio de pagamento usado na compra. O prazo para o valor aparecer na sua conta ou fatura depende do meio de pagamento e das regras do Mercado Pago e do seu banco.</p>
+    <p>Depois do reembolso, a licença de uso do produto é cancelada e o arquivo deve ser apagado.</p>
+
+    <h2>Problemas com o arquivo</h2>
+    <p>Se o produto não chegar ou o arquivo apresentar defeito, escreva para <span class="fill" data-fill="contact_email"></span>. Reenviamos o arquivo correto sem custo.</p>
+
+    <h2>Responsável pela venda</h2>
+    <p><span class="fill" data-fill="legal_name"></span>, <span class="fill" data-fill="legal_doc"></span>, com endereço em <span class="fill" data-fill="legal_address"></span>.</p>
+
+  </main>
+
+  <!-- ================= RODAPÉ ================= -->
+  <footer class="footer">
+    <div class="footer-brand">
+      <img src="/img/logo.png" alt="" width="44" height="44" />
+      <div>
+        <strong>Pensentir</strong>
+        <span>Pensar, sentir, evoluir.</span>
+      </div>
+    </div>
+    <div class="footer-cols">
+      <nav class="footer-col" aria-label="Site">
+        <h4>Site</h4>
+        <a href="/#pilares">Pilares</a>
+        <a href="/#produtos">Ebook</a>
+        <a href="/#instagram">Instagram</a>
+      </nav>
+      <div class="footer-col">
+        <h4>Contato</h4>
+        <a class="js-ig" href="https://www.instagram.com/pensentir/" target="_blank" rel="noopener">Instagram</a>
+        <a class="js-fb" href="#" target="_blank" rel="noopener" hidden>Facebook</a>
+        <a class="js-mail" href="#" hidden></a>
+      </div>
+      <nav class="footer-col" aria-label="Informações legais">
+        <h4>Legal</h4>
+        <a href="/privacidade">Política de privacidade</a>
+        <a href="/termos">Termos de uso</a>
+        <a href="/reembolso">Trocas e reembolso</a>
+        <button type="button" class="js-consent-open">Preferências de privacidade</button>
+      </nav>
+    </div>
+    <div class="footer-legal">
+      <p>© <span id="year"></span> Pensentir. Todos os direitos reservados.</p>
+      <p class="js-legal-line"></p>
+    </div>
+  </footer>
+
+  <!-- ================= AVISO LGPD ================= -->
+  <div class="consent" id="consent" role="region" aria-label="Aviso de privacidade" hidden>
+    <p>Usamos um identificador anônimo, salvo no seu navegador, para contar visitas e melhorar o site. Nada de anúncios ou rastreio de terceiros. <a href="/privacidade">Saiba mais</a>.</p>
+    <div class="btns">
+      <button class="btn btn-line" type="button" id="consentNo">Recusar</button>
+      <button class="btn btn-gold" type="button" id="consentYes">Aceitar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module">
+    import { initCommon, loadConfig } from '/js/common.js';
+    initCommon();
+    loadConfig();
+  </script>
+</body>
+</html>

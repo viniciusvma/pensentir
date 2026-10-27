@@ -17,5 +17,3 @@ services:
         sync: false
       - key: SESSION_SECRET
         generateValue: true
-      - key: INSTAGRAM_TOKEN
-        sync: false

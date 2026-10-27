@@ -1,9 +1,10 @@
 # Pensentir — site
 
-Node + Express (Render) · Supabase (banco + imagens) · Instagram API oficial · Mercado Pago (link de pagamento).
+Node + Express (Render), Supabase (banco e imagens), Mercado Pago (link de pagamento).
 
 - Site: `/`
-- Painel: `/admin` (acessos, produtos, frases da roleta, lista VIP, links, token do Instagram)
+- Painel: `/admin` (acessos, produtos, frases da roleta, lista VIP, links, dados legais)
+- Páginas legais: `/privacidade`, `/termos`, `/reembolso`
 
 ## 1. Supabase
 1. Crie o projeto.
@@ -34,13 +35,9 @@ git push -u origin main
 
 (Ou use **New → Blueprint**, que lê o `render.yaml`.)
 
-## 4. Instagram (posts automáticos)
-Precisa de conta profissional (Criador/Empresa).
-1. developers.facebook.com → crie um app → caso de uso de Instagram.
-2. **Instagram → API setup with Instagram business login → Generate token** → entre com a @pensentir.
-3. Copie o token → `/admin` → Configurações → cole → **Salvar token** → **Testar conexão**.
-
-O token vale 60 dias; o site renova sozinho a cada ~20 dias.
+## 4. Configurar no /admin
+- **Configurações → Links do site:** Instagram, Facebook e e-mail de contato.
+- **Configurações → Dados do responsável:** nome/razão social, CPF/CNPJ e endereço. Aparecem no rodapé e nas páginas `/privacidade`, `/termos` e `/reembolso` (exigência do Decreto 7.962/2013 para quem vende online).
 
 ## 5. Ebook / Mercado Pago
 Crie um **link de pagamento** no Mercado Pago e cole no produto em `/admin → Produtos`.

@@ -305,15 +305,10 @@ async function loadSettings() {
   f.instagram_url.value = s.instagram_url;
   f.facebook_url.value = s.facebook_url;
   f.contact_email.value = s.contact_email;
-
-  const ig = s.instagram;
-  $('#igStatus').innerHTML = ig.configured
-    ? `<span class="ok">● Token configurado (${esc(ig.source)}): ${esc(ig.token_preview)}</span>
-       <span>Atualizado em: ${dt(ig.updated_at)}</span>
-       <span>Expira em: ${ig.expires_at ? dt(ig.expires_at) : 'desconhecido'}</span>
-       ${ig.last_fetch ? `<span>Última busca OK: ${dt(ig.last_fetch)}</span>` : ''}
-       ${ig.last_error ? `<span class="bad">Último erro: ${esc(ig.last_error)}</span>` : ''}`
-    : '<span class="bad">● Nenhum token configurado — o site mostra um botão para o Instagram no lugar dos posts.</span>';
+  const l = $('#legalForm');
+  l.legal_name.value = s.legal_name;
+  l.legal_doc.value = s.legal_doc;
+  l.legal_address.value = s.legal_address;
 }
 
 $('#settingsForm').addEventListener('submit', async (e) => {
@@ -325,28 +320,13 @@ $('#settingsForm').addEventListener('submit', async (e) => {
   } catch (err) { toast(err.message, true); }
 });
 
-$('#igForm').addEventListener('submit', async (e) => {
+$('#legalForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const token = e.target.instagram_token.value.trim();
-  if (!token) return toast('Cole o token primeiro', true);
+  const f = e.target;
   try {
-    await api('/api/admin/settings', { method: 'PUT', body: { instagram_token: token } });
-    e.target.reset();
-    toast('Token salvo');
-    await loadSettings();
+    await api('/api/admin/settings', { method: 'PUT', body: { legal_name: f.legal_name.value.trim(), legal_doc: f.legal_doc.value.trim(), legal_address: f.legal_address.value.trim() } });
+    toast('Dados salvos');
   } catch (err) { toast(err.message, true); }
-});
-
-$('#igTestBtn').addEventListener('click', async () => {
-  try { const r = await api('/api/admin/instagram/test', { method: 'POST' }); toast(`Conectado! ${r.count} posts encontrados.`); }
-  catch (err) { toast(err.message, true); }
-  loadSettings().catch(() => {});
-});
-
-$('#igRefreshBtn').addEventListener('click', async () => {
-  try { await api('/api/admin/instagram/refresh', { method: 'POST' }); toast('Token renovado por mais 60 dias'); }
-  catch (err) { toast(err.message, true); }
-  loadSettings().catch(() => {});
 });
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeProduct(); });

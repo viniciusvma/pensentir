@@ -1,69 +1,42 @@
 // ============================================================
-// PENSENTIR — site público
+// PENSENTIR — página inicial
 // ============================================================
-const $ = (s, el = document) => el.querySelector(s);
-const $$ = (s, el = document) => [...el.querySelectorAll(s)];
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+import { $, $$, esc, track, vid, toast, loadConfig, initCommon } from './common.js';
+
 const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-// ---------- visitante (só para contar acessos únicos) ----------
-function visitorId() {
-  try {
-    let id = localStorage.getItem('pz_vid');
-    if (!id) { id = crypto.randomUUID(); localStorage.setItem('pz_vid', id); }
-    return id;
-  } catch { return null; }
-}
-const VID = visitorId();
-
-function track(type) {
-  fetch('/api/track', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    keepalive: true,
-    body: JSON.stringify({ type, path: location.pathname + location.hash, referrer: document.referrer, visitor_id: VID }),
-  }).catch(() => {});
-}
-
-function toast(msg) {
-  const t = $('#toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => t.classList.remove('show'), 2600);
-}
-
 // ---------- pilares ----------
 const ICONS = {
-  foco: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/><path d="M21 3l-7.5 7.5M17 3h4v4"/>',
+  foco: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/>',
   reflexao: '<path d="M2 6c3-1.5 6.5-1.5 10 1 3.5-2.5 7-2.5 10-1v13c-3-1.5-6.5-1.5-10 1-3.5-2.5-7-2.5-10-1z"/><path d="M12 7v13"/>',
-  evolucao: '<path d="M3 20h18"/><path d="M6 16v-3M10 16v-6M14 16v-4M18 16V7"/><path d="M4 11l5-5 4 3 7-6M16 3h4v4"/>',
+  evolucao: '<path d="M4 20V14M10 20V10M16 20V6"/><path d="M3 9l6-5 4 3 7-5M16 2h4v4"/>',
   mentalidade: '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3h1V4z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3h-1V4z"/>',
   autoconfianca: '<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/>',
   motivacao: '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.3 1.5 1.2 2.5 2.2 2.8C10.8 8.6 11.3 5.5 12 3z"/>',
 };
 
 const PILLARS = [
-  { name: 'Foco', key: 'foco', text: 'Escolher para onde vai sua energia. Menos distração, mais presença no que realmente importa.' },
+  { name: 'Foco', key: 'foco', text: 'Escolher para onde vai sua energia. Menos distração, mais presença no que importa.' },
   { name: 'Reflexão', key: 'reflexao', text: 'Parar, olhar para dentro e entender o porquê. Quem se conhece decide melhor.' },
   { name: 'Evolução', key: 'evolucao', text: 'Crescer um pouco a cada dia. Constância vence intensidade quando o assunto é mudar de vida.' },
   { name: 'Mentalidade', key: 'mentalidade', text: 'Seus pensamentos moldam suas atitudes. Treine a mente como quem treina o corpo.' },
-  { name: 'Autoconfiança', key: 'autoconfianca', text: 'Acreditar em si mesmo antes da prova chegar. Confiança se constrói com pequenas vitórias.' },
+  { name: 'Autoconfiança', key: 'autoconfianca', text: 'Acreditar em si antes da prova chegar. Confiança se constrói com pequenas vitórias.' },
   { name: 'Motivação', key: 'motivacao', text: 'O combustível para começar — e a disciplina para continuar quando a vontade some.' },
 ];
+const iconSvg = (key) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[key]}</svg>`;
 
 function renderPillars() {
   $('#pillars').innerHTML = PILLARS.map((p) => `
-    <article class="pillar reveal-up">
-      <div class="pillar-icon"><svg viewBox="0 0 24 24">${ICONS[p.key]}</svg></div>
+    <article class="pillar">
+      ${iconSvg(p.key)}
       <h3>${p.name}</h3>
       <p>${p.text}</p>
     </article>`).join('');
 }
 
 // ---------- frases ----------
-const FALLBACK_PHRASES = [
+const FALLBACK = [
   ['Foco', 'Onde você coloca sua atenção, você coloca sua vida.'],
   ['Foco', 'Menos coisas, feitas por inteiro.'],
   ['Reflexão', 'Antes de reagir, respire. Antes de decidir, sinta.'],
@@ -78,7 +51,7 @@ const FALLBACK_PHRASES = [
   ['Motivação', 'Comece com o que tem. O resto vem no caminho.'],
 ].map(([pillar, text]) => ({ pillar, text, author: null }));
 
-let phrases = FALLBACK_PHRASES;
+let phrases = FALLBACK;
 let lastPhrase = null;
 
 async function loadPhrases() {
@@ -94,66 +67,73 @@ function pickPhrase(pillarName) {
   const same = phrases.filter((p) => norm(p.pillar) === norm(pillarName));
   let pool = same.length ? same : phrases;
   if (pool.length > 1) pool = pool.filter((p) => p !== lastPhrase);
-  const p = pool[Math.floor(Math.random() * pool.length)];
-  lastPhrase = p;
-  return p;
+  lastPhrase = pool[Math.floor(Math.random() * pool.length)];
+  return lastPhrase;
 }
 
 // ---------- roleta ----------
-const SVGNS = 'http://www.w3.org/2000/svg';
 const SEG = 360 / PILLARS.length;
-const R = 194;
+const R = 198;
 const pt = (a, r) => [r * Math.sin((a * Math.PI) / 180), -r * Math.cos((a * Math.PI) / 180)];
+const f = (n) => n.toFixed(2);
+
+function arc(i, r = R) {
+  const [x0, y0] = pt(i * SEG, r);
+  const [x1, y1] = pt((i + 1) * SEG, r);
+  return `M0 0 L${f(x0)} ${f(y0)} A${r} ${r} 0 0 1 ${f(x1)} ${f(y1)} Z`;
+}
 
 function buildWheel() {
-  const svg = $('#wheel');
-  let html = `
+  let h = `
     <defs>
       <radialGradient id="segA" cx="0" cy="0" r="${R}" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stop-color="#2a1a0e"/><stop offset="1" stop-color="#140c08"/>
+        <stop offset="0" stop-color="#0b0805"/><stop offset=".7" stop-color="#130d07"/><stop offset="1" stop-color="#1f150a"/>
       </radialGradient>
       <radialGradient id="segB" cx="0" cy="0" r="${R}" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stop-color="#5a3414"/><stop offset=".75" stop-color="#8a531f"/><stop offset="1" stop-color="#b8752c"/>
+        <stop offset="0" stop-color="#050403"/><stop offset=".7" stop-color="#090705"/><stop offset="1" stop-color="#110c07"/>
       </radialGradient>
-      <linearGradient id="ring" x1="0" y1="-1" x2="0" y2="1" gradientUnits="objectBoundingBox">
-        <stop offset="0" stop-color="#f8dc98"/><stop offset=".5" stop-color="#c8913e"/><stop offset="1" stop-color="#7a521f"/>
+      <radialGradient id="segHi" cx="0" cy="0" r="${R}" gradientUnits="userSpaceOnUse">
+        <stop offset=".25" stop-color="#f07a2b" stop-opacity="0"/><stop offset=".8" stop-color="#f07a2b" stop-opacity=".28"/><stop offset="1" stop-color="#f5dfab" stop-opacity=".45"/>
+      </radialGradient>
+      <linearGradient id="ringG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f5dfab"/><stop offset=".35" stop-color="#b8862f"/><stop offset=".6" stop-color="#f0d6a0"/><stop offset="1" stop-color="#7a5418"/>
       </linearGradient>
     </defs>
-    <circle r="214" fill="url(#ring)"/>
-    <circle r="200" fill="#0b0908"/>`;
+    <circle r="216" fill="url(#ringG)"/>
+    <circle r="210.5" fill="#000"/>`;
 
+  PILLARS.forEach((p, i) => { h += `<path class="seg" d="${arc(i)}" fill="url(#${i % 2 ? 'segB' : 'segA'})"/>`; });
+  PILLARS.forEach((p, i) => { h += `<path class="seg-hl" data-i="${i}" d="${arc(i)}"/>`; });
+
+  // marcações de mostrador
+  for (let k = 0; k < 72; k++) {
+    const major = k % 12 === 0;
+    const [x0, y0] = pt(k * 5, major ? 198 : 203);
+    const [x1, y1] = pt(k * 5, 208);
+    h += `<line x1="${f(x0)}" y1="${f(y0)}" x2="${f(x1)}" y2="${f(y1)}" stroke="#d4a853" stroke-opacity="${major ? 0.9 : 0.35}" stroke-width="${major ? 1.4 : 1}"/>`;
+  }
+  // divisórias
   PILLARS.forEach((p, i) => {
-    const a0 = i * SEG, a1 = (i + 1) * SEG;
-    const [x0, y0] = pt(a0, R), [x1, y1] = pt(a1, R);
-    html += `<path d="M0 0 L${x0.toFixed(2)} ${y0.toFixed(2)} A${R} ${R} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z" fill="url(#${i % 2 ? 'segB' : 'segA'})"/>`;
+    const [x0, y0] = pt(i * SEG, 64);
+    const [x1, y1] = pt(i * SEG, R);
+    h += `<line x1="${f(x0)}" y1="${f(y0)}" x2="${f(x1)}" y2="${f(y1)}" stroke="#d4a853" stroke-opacity=".45" stroke-width="1"/>`;
   });
-  PILLARS.forEach((p, i) => {
-    const [x, y] = pt(i * SEG, R);
-    html += `<line x1="0" y1="0" x2="${x.toFixed(2)}" y2="${y.toFixed(2)}" stroke="#e3b45f" stroke-opacity=".7" stroke-width="1.5"/>`;
-  });
+  h += `<circle r="${R}" fill="none" stroke="#d4a853" stroke-opacity=".5" stroke-width="1"/>
+        <circle r="150" fill="none" stroke="#d4a853" stroke-opacity=".07" stroke-width="1"/>`;
+
+  // ícones e nomes
   PILLARS.forEach((p, i) => {
     const c = i * SEG + SEG / 2;
-    const flip = c > 180 ? 90 : -90; // lado esquerdo lê de fora pra dentro, sempre na posição certa
-    html += `
+    const flip = c > 180 ? 90 : -90;
+    h += `
       <g transform="rotate(${c})">
-        <text x="0" y="0" transform="translate(0,-130) rotate(${flip})" text-anchor="middle" dominant-baseline="central">${p.name}</text>
-        <circle cx="0" cy="-${R - 10}" r="2.5" fill="#f6d58e" opacity=".8"/>
+        <g transform="translate(0,-182) rotate(${-c})">
+          <svg x="-9" y="-9" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4a853" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${ICONS[p.key]}</svg>
+        </g>
+        <text class="label" transform="translate(0,-128) rotate(${flip})" text-anchor="middle" dominant-baseline="central">${p.name}</text>
       </g>`;
   });
-  html += `<circle r="${R}" fill="none" stroke="#e3b45f" stroke-opacity=".5" stroke-width="2"/>`;
-  svg.innerHTML = html;
-
-  // luzinhas da borda
-  const lights = $('#wheelLights');
-  const N = 24;
-  for (let i = 0; i < N; i++) {
-    const a = (i / N) * 2 * Math.PI;
-    const el = document.createElement('i');
-    el.style.left = `${50 + 46.6 * Math.sin(a)}%`;
-    el.style.top = `${50 - 46.6 * Math.cos(a)}%`;
-    el.style.animationDelay = `${(i % 2) * 0.8}s`;
-    lights.appendChild(el);
-  }
+  $('#wheel').innerHTML = h;
 }
 
 let rotation = 0;
@@ -162,47 +142,53 @@ let spinning = false;
 function spin() {
   if (spinning) return;
   spinning = true;
-  const wrap = $('.wheel-wrap');
+  const wrap = $('#wheelWrap');
   const wheel = $('#wheel');
+  $$('.seg-hl', wheel).forEach((el) => el.classList.remove('on'));
+
   const idx = Math.floor(Math.random() * PILLARS.length);
-  const jitter = (Math.random() - 0.5) * (SEG * 0.7);
-  const target = idx * SEG + SEG / 2 + jitter;            // ângulo (na roda) que deve parar sob o ponteiro
+  const jitter = (Math.random() - 0.5) * SEG * 0.7;
+  const target = idx * SEG + SEG / 2 + jitter; // ângulo da roda que para sob o ponteiro
   const residue = (((360 - target) % 360) + 360) % 360;
   const base = rotation - (((rotation % 360) + 360) % 360);
   rotation = base + 360 * 6 + residue;
 
-  wrap.classList.add('spinning', 'ticking');
+  wrap.classList.add('spinning');
   $('#spinBtn').disabled = true;
   wheel.style.transform = `rotate(${rotation}deg)`;
   track('spin');
 
-  const tickOff = setTimeout(() => wrap.classList.remove('ticking'), 4300);
-  const done = () => {
-    clearTimeout(tickOff);
-    wrap.classList.remove('spinning', 'ticking');
-    $('#spinBtn').disabled = false;
-    spinning = false;
-    showPhrase(PILLARS[idx].name);
-  };
   let finished = false;
-  const finish = () => { if (!finished) { finished = true; done(); } };
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    wrap.classList.remove('spinning');
+    $(`.seg-hl[data-i="${idx}"]`, wheel)?.classList.add('on');
+    setTimeout(() => {
+      spinning = false;
+      $('#spinBtn').disabled = false;
+      showPhrase(PILLARS[idx]);
+    }, 550);
+  };
   wheel.addEventListener('transitionend', finish, { once: true });
   setTimeout(finish, 6200); // garantia caso o transitionend não dispare
 }
 
-function showPhrase(pillarName) {
-  const p = pickPhrase(pillarName);
-  $('#revealPillar').textContent = p.pillar || pillarName;
+function showPhrase(pillar) {
+  const p = pickPhrase(pillar.name);
+  const key = PILLARS.find((x) => norm(x.name) === norm(p.pillar))?.key || pillar.key;
+  $('#revealIcon').innerHTML = iconSvg(key);
+  $('#revealPillar').textContent = p.pillar || pillar.name;
   $('#revealText').innerHTML = esc(p.text)
     .split(' ')
-    .map((w, i) => `<span style="animation-delay:${0.35 + i * 0.07}s">${w}</span>`)
+    .map((w, i) => `<span style="animation-delay:${0.25 + i * 0.06}s">${w}</span>`)
     .join(' ');
   $('#revealAuthor').textContent = p.author ? `— ${p.author}` : '';
   $('#reveal').hidden = false;
   $('#againBtn').focus({ preventScroll: true });
 }
 
-function closeReveal() { $('#reveal').hidden = true; }
+const closeReveal = () => { $('#reveal').hidden = true; };
 
 async function sharePhrase() {
   const text = `“${lastPhrase?.text || ''}” — Pensentir`;
@@ -210,40 +196,26 @@ async function sharePhrase() {
   try {
     if (navigator.share) { await navigator.share({ text, url }); return; }
     await navigator.clipboard.writeText(`${text}\n${url}`);
-    toast('Frase copiada! Cole onde quiser.');
+    toast('Frase copiada. Cole onde quiser.');
   } catch (e) {
     if (e?.name !== 'AbortError') toast('Não foi possível compartilhar agora.');
   }
 }
 
-// ---------- config (links sociais) ----------
-async function loadConfig() {
-  try {
-    const r = await fetch('/api/config');
-    if (!r.ok) return;
-    const c = await r.json();
-    if (c.instagram_url) $$('.js-ig').forEach((a) => (a.href = c.instagram_url));
-    if (c.facebook_url) $$('.js-fb').forEach((a) => { a.href = c.facebook_url; a.hidden = false; });
-    if (c.contact_email) $$('.js-mail').forEach((a) => { a.href = `mailto:${c.contact_email}`; a.hidden = false; });
-  } catch { /* mantém padrão */ }
-}
-
 // ---------- produtos ----------
+const bookCover = (title) => `<div class="book"><div><img src="/img/logo.png" alt=""/><b>${esc(title)}</b></div></div>`;
+
 function emptyProducts() {
   return `
-    <div class="empty-product reveal-up">
-      <div class="book"><div><img src="/img/logo.png" alt=""/><b>EBOOK<br/>PENSENTIR</b></div></div>
-      <div>
-        <p class="eyebrow">Em produção</p>
-        <h3>O ebook da Pensentir está chegando</h3>
-        <p class="muted">Um guia prático para fortalecer sua autoconfiança e transformar reflexão em atitude.</p>
-        <ul>
-          <li>Autoconfiança na prática</li>
-          <li>Reflexão e autoconhecimento</li>
-          <li>Os pilares de uma mente forte</li>
-        </ul>
+    <article class="product">
+      <div class="product-media">${bookCover('Ebook Pensentir')}<span class="badge">Em breve</span></div>
+      <div class="product-body">
+        <h3>O ebook da Pensentir está sendo escrito</h3>
+        <p class="sub">Autoconfiança, reflexão e os pilares de uma mente forte</p>
+        <p class="desc">Um guia prático para fortalecer sua confiança e transformar reflexão em atitude, com exercícios para fazer no seu ritmo.</p>
+        <div class="buy"><a class="btn btn-gold" href="#vip">Quero ser avisado</a></div>
       </div>
-    </div>`;
+    </article>`;
 }
 
 async function loadProducts() {
@@ -254,29 +226,31 @@ async function loadProducts() {
     if (r.ok) list = await r.json();
   } catch { /* vazio */ }
 
-  if (!list.length) { box.innerHTML = emptyProducts(); observeReveal(); return; }
-
+  if (!list.length) { box.innerHTML = emptyProducts(); return; }
+  const v = vid();
   box.innerHTML = list.map((p) => `
-    <article class="product reveal-up">
-      <div class="product-img">
-        ${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.title)}" loading="lazy"/>` : `<div class="book" style="width:120px"><div><img src="/img/logo.png" alt=""/><b>${esc(p.title)}</b></div></div>`}
+    <article class="product">
+      <div class="product-media">
+        ${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.title)}" loading="lazy"/>` : bookCover(p.title)}
         ${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ''}
       </div>
       <div class="product-body">
         <h3>${esc(p.title)}</h3>
         ${p.subtitle ? `<p class="sub">${esc(p.subtitle)}</p>` : ''}
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ''}
-        <div class="price-row">
-          <span class="price">${brl.format(Number(p.price))}</span>
-          ${p.old_price ? `<span class="old">${brl.format(Number(p.old_price))}</span>` : ''}
+        <div class="buy">
+          <div class="price">
+            <b>${brl.format(Number(p.price))}</b>
+            ${p.old_price ? `<s>${brl.format(Number(p.old_price))}</s>` : ''}
+          </div>
+          <a class="btn btn-gold" href="/r/${esc(p.id)}${v ? `?v=${encodeURIComponent(v)}` : ''}" target="_blank" rel="noopener">Comprar agora</a>
+          <p class="buy-note">Pagamento seguro pelo Mercado Pago: Pix, cartão ou boleto. Veja a política de <a href="/reembolso">trocas e reembolso</a>.</p>
         </div>
-        <a class="btn btn-gold" href="/r/${esc(p.id)}${VID ? `?v=${encodeURIComponent(VID)}` : ''}" target="_blank" rel="noopener">Quero o meu</a>
       </div>
     </article>`).join('');
-  observeReveal();
 }
 
-// ---------- lista VIP ----------
+// ---------- aviso de lançamento ----------
 function setupLeadForm() {
   const form = $('#leadForm');
   const msg = $('#leadMsg');
@@ -286,7 +260,7 @@ function setupLeadForm() {
     const email = String(fd.get('email') || '').trim();
     msg.className = 'form-msg';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-      msg.textContent = 'Digite um e-mail válido.';
+      msg.textContent = 'Digite um e-mail válido, como nome@gmail.com.';
       msg.classList.add('err');
       return;
     }
@@ -299,11 +273,11 @@ function setupLeadForm() {
         body: JSON.stringify({ name: fd.get('name'), email }),
       });
       const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || 'Erro ao enviar');
+      if (!r.ok) throw new Error(j.error || 'Não deu para salvar agora. Tente de novo em instantes.');
       form.reset();
-      msg.textContent = 'Pronto! Você está na lista VIP da Pensentir. ✦';
+      msg.textContent = 'Pronto. Você vai receber o aviso quando o ebook sair.';
     } catch (err) {
-      msg.textContent = err.message || 'Erro ao enviar. Tente novamente.';
+      msg.textContent = err.message;
       msg.classList.add('err');
     } finally {
       btn.disabled = false;
@@ -311,92 +285,15 @@ function setupLeadForm() {
   });
 }
 
-// ---------- Instagram ----------
-const IG_ICON = {
-  VIDEO: '<svg class="ig-type" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>',
-  CAROUSEL_ALBUM: '<svg class="ig-type" viewBox="0 0 24 24" fill="#fff"><path d="M4 7h11v13H4z"/><path d="M8 4h12v13h-2V6H8z"/></svg>',
-};
-
-async function loadInstagram() {
-  const grid = $('#igGrid');
-  let posts = [];
-  try {
-    const r = await fetch('/api/instagram');
-    if (r.ok) posts = (await r.json()).posts || [];
-  } catch { /* vazio */ }
-
-  if (!posts.length) {
-    const href = $('.js-ig').href;
-    grid.innerHTML = `<div class="ig-empty">As reflexões mais recentes estão no nosso Instagram.<br/><br/><a class="btn btn-gold js-ig" href="${esc(href)}" target="_blank" rel="noopener">Abrir @pensentir</a></div>`;
-    bindSocialTracking();
-    return;
-  }
-  grid.innerHTML = posts.slice(0, 12).map((p) => `
-    <a class="ig-item js-ig-post" href="${esc(p.permalink)}" target="_blank" rel="noopener" aria-label="Ver post no Instagram">
-      <img src="${esc(p.image)}" alt="${esc(p.caption.slice(0, 100))}" loading="lazy" referrerpolicy="no-referrer"/>
-      ${IG_ICON[p.type] || ''}
-      ${p.caption ? `<span class="ig-cap">${esc(p.caption)}</span>` : ''}
-    </a>`).join('');
-  $$('.js-ig-post', grid).forEach((a) => a.addEventListener('click', () => track('ig_click')));
-}
-
-function bindSocialTracking() {
-  $$('.js-ig').forEach((a) => { if (!a.dataset.t) { a.dataset.t = 1; a.addEventListener('click', () => track('ig_click')); } });
-  $$('.js-fb').forEach((a) => { if (!a.dataset.t) { a.dataset.t = 1; a.addEventListener('click', () => track('fb_click')); } });
-}
-
-// ---------- efeitos ----------
-function embers() {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const box = $('.embers');
-  const n = innerWidth < 600 ? 12 : 24;
-  for (let i = 0; i < n; i++) {
-    const e = document.createElement('i');
-    e.style.left = `${Math.random() * 100}%`;
-    e.style.animationDuration = `${9 + Math.random() * 12}s`;
-    e.style.animationDelay = `${-Math.random() * 20}s`;
-    e.style.setProperty('--drift', `${(Math.random() - 0.5) * 120}px`);
-    e.style.transform = `scale(${0.5 + Math.random()})`;
-    box.appendChild(e);
-  }
-}
-
-let io;
-function observeReveal() {
-  if (!('IntersectionObserver' in window)) { $$('.reveal-up').forEach((el) => el.classList.add('in')); return; }
-  io ||= new IntersectionObserver((entries) => entries.forEach((en) => {
-    if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-  }), { threshold: 0.12 });
-  $$('.reveal-up:not(.in)').forEach((el) => io.observe(el));
-}
-
-function setupNav() {
-  const burger = $('#burger');
-  const links = $('#navLinks');
-  burger.addEventListener('click', () => {
-    const open = !links.classList.contains('open');
-    links.classList.toggle('open', open);
-    burger.setAttribute('aria-expanded', String(open));
-  });
-  $$('a', links).forEach((a) => a.addEventListener('click', () => {
-    links.classList.remove('open');
-    burger.setAttribute('aria-expanded', 'false');
-  }));
-}
-
 // ---------- init ----------
-$('#year').textContent = new Date().getFullYear();
+initCommon();
 renderPillars();
 buildWheel();
-embers();
-setupNav();
 setupLeadForm();
-$$('.section-head, .manifesto-inner, .vip').forEach((el) => el.classList.add('reveal-up'));
-observeReveal();
 
 $('#spinBtn').addEventListener('click', spin);
 $('#hubBtn').addEventListener('click', spin);
-$('#againBtn').addEventListener('click', () => { closeReveal(); setTimeout(spin, 250); });
+$('#againBtn').addEventListener('click', () => { closeReveal(); setTimeout(spin, 200); });
 $('#shareBtn').addEventListener('click', sharePhrase);
 $('#revealClose').addEventListener('click', closeReveal);
 $('#reveal').addEventListener('click', (e) => { if (e.target.id === 'reveal') closeReveal(); });
@@ -404,5 +301,5 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeRevea
 
 track('pageview');
 loadPhrases();
-loadConfig().then(() => { bindSocialTracking(); loadInstagram(); });
+loadConfig();
 loadProducts();

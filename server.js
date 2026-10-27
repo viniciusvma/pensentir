@@ -13,7 +13,6 @@ const {
   SUPABASE_SERVICE_KEY,
   ADMIN_PASSWORD,
   SESSION_SECRET,
-  INSTAGRAM_TOKEN,
   NODE_ENV,
 } = process.env;
 
@@ -134,60 +133,8 @@ function passwordOk(input) {
   return crypto.timingSafeEqual(a, b);
 }
 
-// ---------------------------------------------------------------- Instagram
-const IG_FIELDS = 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp';
-const IG_CACHE_MS = 60 * 60 * 1000;          // 1h
-const IG_REFRESH_AFTER_MS = 20 * 24 * 3600e3; // renova o token depois de 20 dias
-let igCache = { at: 0, posts: null };
-let igStatus = { lastError: null, lastFetch: null, lastRefreshTry: 0 };
-
-async function igToken() {
-  const s = await getSettings(['instagram_token', 'instagram_token_updated_at']);
-  return {
-    token: s.instagram_token || INSTAGRAM_TOKEN || null,
-    updatedAt: s.instagram_token_updated_at ? new Date(s.instagram_token_updated_at) : null,
-  };
-}
-
-async function refreshIgToken(token) {
-  const url = `https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${encodeURIComponent(token)}`;
-  const r = await fetch(url);
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok || !j.access_token) throw new Error(j.error?.message || `Falha ao renovar token (HTTP ${r.status})`);
-  await setSetting('instagram_token', j.access_token);
-  await setSetting('instagram_token_updated_at', new Date().toISOString());
-  if (j.expires_in) await setSetting('instagram_token_expires_at', new Date(Date.now() + j.expires_in * 1000).toISOString());
-  return j.access_token;
-}
-
-async function fetchInstagram() {
-  let { token, updatedAt } = await igToken();
-  if (!token) throw new Error('Token do Instagram não configurado');
-
-  const old = !updatedAt || Date.now() - updatedAt.getTime() > IG_REFRESH_AFTER_MS;
-  if (old && Date.now() - igStatus.lastRefreshTry > 6 * 3600e3) {
-    igStatus.lastRefreshTry = Date.now();
-    try { token = await refreshIgToken(token); } catch (e) { console.warn('[instagram] refresh:', e.message); }
-  }
-
-  const r = await fetch(`https://graph.instagram.com/me/media?fields=${IG_FIELDS}&limit=12&access_token=${encodeURIComponent(token)}`);
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error?.message || `Erro Instagram (HTTP ${r.status})`);
-
-  return (j.data || [])
-    .map((m) => ({
-      id: m.id,
-      type: m.media_type,
-      image: m.media_type === 'VIDEO' ? m.thumbnail_url : m.media_url,
-      permalink: m.permalink,
-      caption: (m.caption || '').slice(0, 160),
-      timestamp: m.timestamp,
-    }))
-    .filter((m) => m.image && m.permalink);
-}
-
 // ---------------------------------------------------------------- PUBLIC API
-const PUBLIC_SETTINGS = ['instagram_url', 'facebook_url', 'contact_email'];
+const PUBLIC_SETTINGS = ['instagram_url', 'facebook_url', 'contact_email', 'legal_name', 'legal_doc', 'legal_address'];
 
 app.get('/healthz', (req, res) => res.send('ok'));
 
@@ -213,21 +160,6 @@ app.get('/api/phrases', ah(async (req, res) => {
   if (error) throw error;
   res.set('Cache-Control', 'public, max-age=300');
   res.json(data);
-}));
-
-app.get('/api/instagram', ah(async (req, res) => {
-  if (igCache.posts && Date.now() - igCache.at < IG_CACHE_MS) return res.json({ posts: igCache.posts });
-  try {
-    const posts = await fetchInstagram();
-    igCache = { at: Date.now(), posts };
-    igStatus.lastError = null;
-    igStatus.lastFetch = new Date().toISOString();
-    res.json({ posts });
-  } catch (e) {
-    igStatus.lastError = e.message;
-    console.warn('[instagram]', e.message);
-    res.json({ posts: igCache.posts || [] });
-  }
 }));
 
 const TRACK_TYPES = new Set(['pageview', 'spin', 'ig_click', 'fb_click']);
@@ -440,21 +372,8 @@ app.delete('/api/admin/leads/:id', ah(async (req, res) => {
 // ---- configurações
 app.get('/api/admin/settings', ah(async (req, res) => {
   const s = await getSettings();
-  const token = s.instagram_token || INSTAGRAM_TOKEN || '';
-  res.json({
-    instagram_url: s.instagram_url || '',
-    facebook_url: s.facebook_url || '',
-    contact_email: s.contact_email || '',
-    instagram: {
-      configured: !!token,
-      source: s.instagram_token ? 'painel' : INSTAGRAM_TOKEN ? 'variável de ambiente' : null,
-      token_preview: token ? `${token.slice(0, 6)}…${token.slice(-4)}` : '',
-      updated_at: s.instagram_token_updated_at || null,
-      expires_at: s.instagram_token_expires_at || null,
-      last_error: igStatus.lastError,
-      last_fetch: igStatus.lastFetch,
-    },
-  });
+  const keys = ['instagram_url', 'facebook_url', 'contact_email', 'legal_name', 'legal_doc', 'legal_address'];
+  res.json(Object.fromEntries(keys.map((k) => [k, s[k] || ''])));
 }));
 
 app.put('/api/admin/settings', ah(async (req, res) => {
@@ -471,39 +390,10 @@ app.put('/api/admin/settings', ah(async (req, res) => {
     if (v && !EMAIL_RE.test(v)) return res.status(400).json({ error: 'E-mail de contato inválido' });
     await setSetting('contact_email', v);
   }
-  if (b.instagram_token) {
-    const t = clip(b.instagram_token, 1000);
-    await setSetting('instagram_token', t);
-    await setSetting('instagram_token_updated_at', new Date().toISOString());
-    await setSetting('instagram_token_expires_at', new Date(Date.now() + 60 * 24 * 3600e3).toISOString());
-    igCache = { at: 0, posts: null };
+  for (const [key, max] of [['legal_name', 160], ['legal_doc', 40], ['legal_address', 300]]) {
+    if (key in b) await setSetting(key, clip(b[key], max) || '');
   }
   res.json({ ok: true });
-}));
-
-app.post('/api/admin/instagram/refresh', ah(async (req, res) => {
-  const { token } = await igToken();
-  if (!token) return res.status(400).json({ error: 'Nenhum token configurado' });
-  try {
-    await refreshIgToken(token);
-    igCache = { at: 0, posts: null };
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(400).json({ error: e.message });
-  }
-}));
-
-app.post('/api/admin/instagram/test', ah(async (req, res) => {
-  try {
-    const posts = await fetchInstagram();
-    igCache = { at: Date.now(), posts };
-    igStatus.lastError = null;
-    igStatus.lastFetch = new Date().toISOString();
-    res.json({ ok: true, count: posts.length });
-  } catch (e) {
-    igStatus.lastError = e.message;
-    res.status(400).json({ error: e.message });
-  }
 }));
 
 // ---------------------------------------------------------------- STATIC
@@ -522,5 +412,14 @@ app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) return res.status(400).json({ error: 'Arquivo muito grande (máx. 5MB)' });
   res.status(500).json({ error: 'Erro interno' });
 });
+
+// LGPD: apaga estatísticas com mais de 24 meses (na subida e 1x por dia)
+async function purgeOldEvents() {
+  const cutoff = new Date(Date.now() - 730 * 24 * 3600e3).toISOString();
+  const { error } = await db.from('events').delete().lt('created_at', cutoff);
+  if (error) console.error('[limpeza]', error.message);
+}
+purgeOldEvents();
+setInterval(purgeOldEvents, 24 * 3600e3).unref();
 
 app.listen(PORT, () => console.log(`[pensentir] rodando na porta ${PORT}`));

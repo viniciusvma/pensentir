@@ -6,9 +6,6 @@
   <meta name="robots" content="noindex, nofollow" />
   <title>Admin — Pensentir</title>
   <link rel="icon" type="image/png" href="/img/favicon.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/admin.css" />
 </head>
 <body>
@@ -26,7 +23,7 @@
   <!-- APP -->
   <div class="app" id="app" hidden>
     <aside class="side">
-      <div class="side-brand"><img src="/img/logo.png" alt="" width="36" height="36" /><span>PENSENTIR</span></div>
+      <div class="side-brand"><img src="/img/logo.png" alt="" width="36" height="36" /><span>Pensentir</span></div>
       <nav class="tabs" id="tabs">
         <button data-tab="dash" class="active">Acessos</button>
         <button data-tab="products">Produtos</button>
@@ -110,16 +107,13 @@
           <button class="btn btn-gold" type="submit">Salvar links</button>
         </form>
 
-        <form class="card form" id="igForm">
-          <h3>Instagram (API oficial)</h3>
-          <div class="ig-status" id="igStatus"></div>
-          <label>Novo token de acesso<input name="instagram_token" type="password" placeholder="Cole aqui o token gerado no painel da Meta" autocomplete="off" /></label>
-          <div class="row">
-            <button class="btn btn-gold" type="submit">Salvar token</button>
-            <button class="btn btn-ghost" type="button" id="igTestBtn">Testar conexão</button>
-            <button class="btn btn-ghost" type="button" id="igRefreshBtn">Renovar token agora</button>
-          </div>
-          <p class="hint">O token dura 60 dias. O site renova sozinho a cada ~20 dias enquanto tiver visitas. Se ficar mais de 60 dias sem renovar, gere outro na Meta e cole aqui.</p>
+        <form class="card form" id="legalForm">
+          <h3>Dados do responsável</h3>
+          <p class="hint">Aparecem no rodapé e nas páginas de Privacidade, Termos e Reembolso. Quem vende pela internet precisa mostrar nome, CPF ou CNPJ, endereço e e-mail de contato (Decreto 7.962/2013). O e-mail de contato é o da seção acima.</p>
+          <label>Nome ou razão social<input name="legal_name" maxlength="160" placeholder="Ex: Vinicius Machado ou Pensentir LTDA" /></label>
+          <label>CPF ou CNPJ<input name="legal_doc" maxlength="40" placeholder="00.000.000/0001-00" /></label>
+          <label>Endereço<input name="legal_address" maxlength="300" placeholder="Rua, número - Cidade/UF" /></label>
+          <button class="btn btn-gold" type="submit">Salvar dados</button>
         </form>
       </section>
     </main>

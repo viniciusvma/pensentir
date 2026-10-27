@@ -3,26 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pensentir — Pensar • Sentir • Evoluir</title>
+  <title>Pensentir — Pensar, sentir, evoluir</title>
   <meta name="description" content="Pensentir: reflexão, autoconfiança, foco e motivação para você despertar sua mente e evoluir a cada dia." />
-  <meta name="theme-color" content="#0b0a0c" />
-  <meta property="og:title" content="Pensentir — Pensar • Sentir • Evoluir" />
-  <meta property="og:description" content="Desperte sua mente. Transforme seus pensamentos. Fortaleça sua essência. Evolua a cada dia." />
+  <meta name="theme-color" content="#000000" />
+  <meta property="og:title" content="Pensentir — Pensar, sentir, evoluir" />
+  <meta property="og:description" content="Gire a roleta dos pilares e receba a frase que o seu dia precisa." />
   <meta property="og:image" content="/img/logo.png" />
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/png" href="/img/favicon.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preload" href="/fonts/jakarta.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <div class="embers" aria-hidden="true"></div>
-
   <header class="nav" id="topo">
     <a href="#topo" class="brand" aria-label="Pensentir — início">
-      <img src="/img/logo.png" alt="" width="40" height="40" />
-      <span>PENSENTIR</span>
+      <img src="/img/logo.png" alt="" width="36" height="36" />
+      <span>Pensentir</span>
     </a>
     <nav class="nav-links" id="navLinks">
       <a href="#pilares">Pilares</a>
@@ -37,136 +33,164 @@
       <a class="icon-btn js-fb" href="#" target="_blank" rel="noopener" aria-label="Facebook" hidden>
         <svg viewBox="0 0 24 24"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.8-4.5 4.6V11H7v4h2.5v6h4v-6h3l.5-4h-3.5V8.8c0-.5.3-.8.5-.8z" class="fill"/></svg>
       </a>
-      <button class="burger" id="burger" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span></button>
+      <button class="burger" id="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span></button>
     </div>
   </header>
 
-  <!-- ================= HERO / ROLETA ================= -->
-  <section class="hero">
-    <div class="hero-glow" aria-hidden="true"></div>
-    <div class="hero-text">
-      <p class="eyebrow">Pensar • Sentir • Evoluir</p>
-      <h1>Gire a roleta.<br /><em>Receba a frase</em> que o seu dia precisa.</h1>
-      <p class="lead">Desperte sua mente, transforme seus pensamentos, fortaleça sua essência e evolua a cada dia.</p>
-      <div class="hero-cta">
-        <button class="btn btn-gold" id="spinBtn">Girar a roleta</button>
-        <a href="#produtos" class="btn btn-ghost">Conhecer o ebook</a>
-      </div>
-    </div>
+  <main>
+    <!-- ================= HERO / ROLETA ================= -->
+    <section class="hero">
+      <div class="sunset" aria-hidden="true"></div>
 
-    <div class="wheel-wrap">
-      <div class="wheel-pointer" aria-hidden="true"></div>
-      <div class="wheel-lights" id="wheelLights" aria-hidden="true"></div>
-      <svg class="wheel" id="wheel" viewBox="-220 -220 440 440" role="img" aria-label="Roleta dos pilares Pensentir"></svg>
-      <button class="wheel-hub" id="hubBtn" aria-label="Girar a roleta">
-        <img src="/img/logo.png" alt="" />
-      </button>
-    </div>
-
-    <div class="reveal" id="reveal" role="dialog" aria-modal="true" aria-labelledby="revealPillar" hidden>
-      <div class="reveal-card">
-        <button class="reveal-close" id="revealClose" aria-label="Fechar">×</button>
-        <p class="reveal-pillar" id="revealPillar"></p>
-        <span class="reveal-line"></span>
-        <blockquote class="reveal-text" id="revealText"></blockquote>
-        <p class="reveal-author" id="revealAuthor"></p>
-        <div class="reveal-actions">
-          <button class="btn btn-gold" id="againBtn">Girar de novo</button>
-          <button class="btn btn-ghost" id="shareBtn">Compartilhar</button>
+      <div class="hero-text">
+        <h1>Uma frase pode mudar o rumo do seu dia.</h1>
+        <p class="lead">Gire a roleta dos pilares Pensentir e receba uma reflexão sobre foco, autoconfiança, evolução — o que você estiver precisando hoje.</p>
+        <div class="hero-cta">
+          <button class="btn btn-gold" id="spinBtn">Girar a roleta</button>
+          <a href="#produtos" class="btn btn-line">Ver o ebook</a>
         </div>
-        <p class="reveal-sign">— Pensentir</p>
       </div>
-    </div>
-  </section>
 
-  <!-- ================= PILARES ================= -->
-  <section class="section" id="pilares">
-    <div class="section-head">
-      <p class="eyebrow">Os pilares</p>
-      <h2>O que sustenta uma mente forte</h2>
-      <p class="muted">Seis caminhos que se conectam. Comece por qualquer um — todos levam para frente.</p>
-    </div>
-    <div class="pillars" id="pillars"></div>
-  </section>
+      <div class="wheel-wrap" id="wheelWrap">
+        <div class="wheel-needle" aria-hidden="true"><span></span></div>
+        <svg class="wheel" id="wheel" viewBox="-220 -220 440 440" role="img" aria-label="Roleta com os seis pilares Pensentir"></svg>
+        <button class="wheel-hub" id="hubBtn" aria-label="Girar a roleta">
+          <img src="/img/logo.png" alt="" />
+        </button>
+      </div>
+    </section>
 
-  <!-- ================= MANIFESTO ================= -->
-  <section class="section manifesto" id="manifesto">
-    <div class="manifesto-inner">
-      <p class="eyebrow">Manifesto</p>
-      <h2>Pensar antes de reagir.<br />Sentir antes de decidir.<br />Evoluir todos os dias.</h2>
-      <div class="manifesto-grid">
+    <!-- ================= PILARES ================= -->
+    <section class="block" id="pilares">
+      <div class="block-head">
+        <h2>Seis pilares para uma mente forte</h2>
+        <p>São os temas da roleta e de tudo o que a gente publica. Comece por qualquer um — todos levam para frente.</p>
+      </div>
+      <div class="pillars" id="pillars"></div>
+    </section>
+
+    <!-- ================= MANIFESTO ================= -->
+    <section class="manifesto" id="manifesto">
+      <p class="manifesto-big">Pensar antes de reagir. Sentir antes de decidir. Evoluir todos os dias.</p>
+      <div class="triad">
         <div>
-          <span class="step">01</span>
           <h3>Pensar</h3>
           <p>Olhar para dentro com honestidade. Questionar o que você repete para si mesmo e escolher pensamentos que te levam para frente.</p>
         </div>
         <div>
-          <span class="step">02</span>
           <h3>Sentir</h3>
-          <p>Acolher o que você sente sem se deixar governar por isso. Emoção é informação — não sentença.</p>
+          <p>Acolher o que você sente sem se deixar governar por isso. Emoção é informação, não sentença.</p>
         </div>
         <div>
-          <span class="step">03</span>
           <h3>Evoluir</h3>
           <p>Transformar reflexão em atitude. Um passo pequeno por dia, com constância, muda uma vida inteira.</p>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ================= PRODUTOS ================= -->
-  <section class="section" id="produtos">
-    <div class="section-head">
-      <p class="eyebrow">Loja Pensentir</p>
-      <h2>Materiais para sua evolução</h2>
-      <p class="muted">Conteúdo prático sobre autoconfiança, reflexão e mentalidade.</p>
-    </div>
-    <div class="products" id="products"></div>
-
-    <div class="vip" id="vip">
-      <div>
-        <p class="eyebrow">Lista VIP</p>
-        <h3>Seja o primeiro a saber dos lançamentos</h3>
-        <p class="muted">Deixe seu e-mail e receba o aviso do ebook antes de todo mundo.</p>
+    <!-- ================= PRODUTOS ================= -->
+    <section class="block" id="produtos">
+      <div class="block-head">
+        <h2>Materiais para sua evolução</h2>
+        <p>Conteúdo prático sobre autoconfiança, reflexão e mentalidade, para ler no seu tempo.</p>
       </div>
-      <form class="vip-form" id="leadForm" novalidate>
-        <input type="text" name="name" placeholder="Seu nome" autocomplete="name" maxlength="80" />
-        <input type="email" name="email" placeholder="Seu melhor e-mail" autocomplete="email" required maxlength="160" />
-        <button class="btn btn-gold" type="submit">Quero entrar</button>
-        <p class="form-msg" id="leadMsg" role="status"></p>
-      </form>
-    </div>
-  </section>
+      <div class="products" id="products"></div>
 
-  <!-- ================= INSTAGRAM ================= -->
-  <section class="section" id="instagram">
-    <div class="section-head">
-      <p class="eyebrow">@pensentir</p>
-      <h2>Reflexões no Instagram</h2>
-      <p class="muted">Uma dose diária de pensamento. Siga e acompanhe.</p>
-    </div>
-    <div class="ig-grid" id="igGrid">
-      <div class="ig-skel"></div><div class="ig-skel"></div><div class="ig-skel"></div>
-      <div class="ig-skel"></div><div class="ig-skel"></div><div class="ig-skel"></div>
-    </div>
-    <div class="center">
-      <a class="btn btn-ghost js-ig" href="https://www.instagram.com/pensentir/" target="_blank" rel="noopener">Seguir @pensentir</a>
-    </div>
-  </section>
+      <div class="vip" id="vip">
+        <div class="vip-text">
+          <h3>Avise-me dos lançamentos</h3>
+          <p>Deixe seu e-mail e receba o aviso quando o ebook sair.</p>
+        </div>
+        <form class="vip-form" id="leadForm" novalidate>
+          <label class="sr" for="leadName">Seu nome</label>
+          <input id="leadName" type="text" name="name" placeholder="Seu nome" autocomplete="name" maxlength="80" />
+          <label class="sr" for="leadEmail">Seu e-mail</label>
+          <input id="leadEmail" type="email" name="email" placeholder="Seu melhor e-mail" autocomplete="email" required maxlength="160" />
+          <button class="btn btn-gold" type="submit">Quero ser avisado</button>
+          <p class="consent-note">Usamos seu e-mail só para avisar sobre lançamentos da Pensentir. Você pode pedir a exclusão a qualquer momento. Veja a <a href="/privacidade">Política de privacidade</a>.</p>
+          <p class="form-msg" id="leadMsg" role="status"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================= INSTAGRAM ================= -->
+    <section class="block" id="instagram">
+      <div class="ig-band">
+        <img class="ig-avatar" src="/img/logo.png" alt="" width="96" height="96" />
+        <div class="ig-info">
+          <h2>@pensentir</h2>
+          <p>Uma dose diária de reflexão no seu feed: frases, carrosséis e vídeos sobre foco, mentalidade e evolução.</p>
+        </div>
+        <a class="btn btn-gold js-ig" href="https://www.instagram.com/pensentir/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" class="fill"/></svg>
+          Seguir no Instagram
+        </a>
+      </div>
+    </section>
+  </main>
 
   <!-- ================= RODAPÉ ================= -->
   <footer class="footer">
     <div class="footer-brand">
-      <img src="/img/logo.png" alt="Pensentir" width="72" height="72" />
-      <p>Pensar • Sentir • Evoluir</p>
+      <img src="/img/logo.png" alt="" width="44" height="44" />
+      <div>
+        <strong>Pensentir</strong>
+        <span>Pensar, sentir, evoluir.</span>
+      </div>
     </div>
-    <div class="footer-links">
-      <a class="js-ig" href="https://www.instagram.com/pensentir/" target="_blank" rel="noopener">Instagram</a>
-      <a class="js-fb" href="#" target="_blank" rel="noopener" hidden>Facebook</a>
-      <a class="js-mail" href="#" hidden>Contato</a>
+    <div class="footer-cols">
+      <nav class="footer-col" aria-label="Site">
+        <h4>Site</h4>
+        <a href="/#pilares">Pilares</a>
+        <a href="/#produtos">Ebook</a>
+        <a href="/#instagram">Instagram</a>
+      </nav>
+      <div class="footer-col">
+        <h4>Contato</h4>
+        <a class="js-ig" href="https://www.instagram.com/pensentir/" target="_blank" rel="noopener">Instagram</a>
+        <a class="js-fb" href="#" target="_blank" rel="noopener" hidden>Facebook</a>
+        <a class="js-mail" href="#" hidden></a>
+      </div>
+      <nav class="footer-col" aria-label="Informações legais">
+        <h4>Legal</h4>
+        <a href="/privacidade">Política de privacidade</a>
+        <a href="/termos">Termos de uso</a>
+        <a href="/reembolso">Trocas e reembolso</a>
+        <button type="button" class="js-consent-open">Preferências de privacidade</button>
+      </nav>
     </div>
-    <p class="copy">© <span id="year"></span> Pensentir. Todos os direitos reservados.</p>
+    <div class="footer-legal">
+      <p>© <span id="year"></span> Pensentir. Todos os direitos reservados.</p>
+      <p class="js-legal-line"></p>
+    </div>
   </footer>
+
+  <!-- ================= AVISO LGPD ================= -->
+  <div class="consent" id="consent" role="region" aria-label="Aviso de privacidade" hidden>
+    <p>Usamos um identificador anônimo, salvo no seu navegador, para contar visitas e melhorar o site. Nada de anúncios ou rastreio de terceiros. <a href="/privacidade">Saiba mais</a>.</p>
+    <div class="btns">
+      <button class="btn btn-line" type="button" id="consentNo">Recusar</button>
+      <button class="btn btn-gold" type="button" id="consentYes">Aceitar</button>
+    </div>
+  </div>
+
+  <!-- ================= FRASE REVELADA ================= -->
+  <div class="reveal" id="reveal" role="dialog" aria-modal="true" aria-labelledby="revealPillar" hidden>
+    <div class="reveal-card">
+      <button class="reveal-close" id="revealClose" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="reveal-icon" id="revealIcon" aria-hidden="true"></div>
+      <p class="reveal-pillar" id="revealPillar"></p>
+      <blockquote class="reveal-text" id="revealText"></blockquote>
+      <p class="reveal-author" id="revealAuthor"></p>
+      <div class="reveal-actions">
+        <button class="btn btn-gold" id="againBtn">Girar de novo</button>
+        <button class="btn btn-line" id="shareBtn">Compartilhar</button>
+      </div>
+      <img class="reveal-logo" src="/img/logo.png" alt="Pensentir" width="34" height="34" />
+    </div>
+  </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="/js/main.js" type="module"></script>
